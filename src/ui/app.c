@@ -98,7 +98,7 @@ void app_free(App *a) {
   canvas_free(a->canvas);
   free(a->start_dir);
   free(a->saved_work);
-  free(a->buddies.crews);
+  free(a->buddies.flocks);
   free(a);
 }
 

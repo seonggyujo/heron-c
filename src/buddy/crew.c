@@ -7,16 +7,19 @@
 #include "buddy/crew_internal.h"
 
 #define FADE_MS 300.0f
-#define MAX_STEP 0.1f  // seconds: after a long still spell, move as if one frame passed
+#define MAX_STEP 0.1f      // seconds: after a long still spell, move as if one frame passed
+#define ARRIVE_GAP_MS 500  // between the herons of one pane flying in
 
 static const char *const MOOD_NAMES[] = {"gone", "asleep", "busy", "calling", "asking", "cheering"};
 
-void crew_init(Crew *c, uint32_t seed, uint64_t now) {
+void crew_init(Crew *c, uint32_t seed, int index, uint64_t now) {
   *c = (Crew){0};
   c->rng = seed ? seed : 1;
+  c->index = index;
   c->mood = MOOD_GONE;
   c->mood_at = c->last = now;
   c->dir = -1;
+  c->retry_at = now + (uint64_t)index * ARRIVE_GAP_MS;  // looks for room only then
 }
 
 uint32_t crew_random(Crew *c, uint32_t lo, uint32_t hi) {

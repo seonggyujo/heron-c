@@ -1,6 +1,7 @@
-// One pane's heron and its chicks. The heron stands on blank cells of the
-// terminal (buddy/ground.h) and acts out the agent's state; each running
-// subagent is a chick that follows it:
+// One heron of a pane and its chicks (a pane may have a few, each its own
+// crew). The heron stands on blank cells of the terminal (buddy/ground.h)
+// and acts out the agent's state; each running subagent is a chick that
+// follows one of the pane's herons:
 //   working     walks its run, stops to peck, now and then flies elsewhere
 //   permission  calls with a !, flapping now and then (question, waiting: ?)
 //   done        cheers with its wings up and a few sparks, then stands
@@ -56,6 +57,7 @@ typedef struct {
 
 typedef struct {
   uint32_t rng;
+  int index;  // its place among the pane's herons, from 0
   Mood mood;
   uint64_t mood_at, last;  // when the mood began; the last update
   float cell_w, cell_h;    // as last given
@@ -89,11 +91,17 @@ typedef struct {
   PoseItem items[CREW_ITEMS_MAX];
 } Pose;
 
-void crew_init(Crew *c, uint32_t seed, uint64_t now);
+// The heron at index flies in index * 0.5 s after the first and lands a
+// little further in, so a pane's herons arrive one by one, side by side.
+void crew_init(Crew *c, uint32_t seed, int index, uint64_t now);
 // now is in ms, on any clock that only goes forward.
 void crew_update(Crew *c, const CrewInput *in, uint64_t now);
 // The agent left and everything has faded: the crew can go.
 bool crew_done(const Crew *c);
+
+// crew_chicks.c: how many of the subagents' chicks follow the heron at
+// index when a pane has herons of them, dealt out in turn.
+int crew_chick_share(int subagents, int herons, int index);
 
 // crew_pose.c
 void crew_pose(const Crew *c, uint64_t now, Pose *out);

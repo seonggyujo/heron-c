@@ -12,6 +12,7 @@
 #define EDGE_ROOM 2
 // Runs this many cells wider than the heron are tried first.
 #define ROOMY (2 * EDGE_ROOM + 1)
+#define LINE_GAP (HERON_W + 6.0f)  // between herons that fly in together
 
 static int rows_tall(const CrewInput *in) { return (int)ceilf(STAGE_H / in->cell_h - 0.01f); }
 static int cols_wide(const CrewInput *in) { return (int)ceilf(HERON_W / in->cell_w - 0.01f); }
@@ -58,7 +59,8 @@ Point crew_heron_at(const Crew *c, uint64_t now) {
 }
 
 // Flies to s from where the heron is, or in from the nearer side when it
-// was not to be seen.
+// was not to be seen, landing a heron's width further in for each heron
+// of the pane before it.
 static void fly_to(Crew *c, const CrewInput *in, Spot s, uint64_t now) {
   Point from = crew_heron_at(c, now);
   c->spot = s;
@@ -68,7 +70,8 @@ static void fly_to(Crew *c, const CrewInput *in, Spot s, uint64_t now) {
     float width = (float)term_cols(in->term) * in->cell_w;
     bool right = to.x + HERON_W / 2.0f > width / 2;
     from = (Point){right ? width + 2 : -HERON_W - 2.0f, to.y - 2 * in->cell_h};
-    to.x = right ? crew_right(c) : crew_left(c);
+    float in_by = (float)c->index * LINE_GAP;
+    to.x = clampf(right ? crew_right(c) - in_by : crew_left(c) + in_by, crew_left(c), crew_right(c));
     c->opacity = 1;
   }
   float dist = hypotf(to.x - from.x, to.y - from.y);

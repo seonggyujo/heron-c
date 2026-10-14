@@ -13,7 +13,10 @@ typedef enum {
   SET_FONT_VALUE,
   SET_FONT_LARGER,
   SET_MOTION,
-  SET_BUDDIES,
+  SET_BUDDIES_OFF,  // then 1, 2 and 3 herons, in order
+  SET_BUDDIES_1,
+  SET_BUDDIES_2,
+  SET_BUDDIES_3,
   SET_CLOSE_ON_EXIT,
   SET_RESTORE,
   SET_HOOKS,

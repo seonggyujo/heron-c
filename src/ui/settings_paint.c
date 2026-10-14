@@ -50,7 +50,9 @@ static void paint_controls(App *a, const SettingsLayout *l) {
                ALIGN_CENTER);
 
   widget_switch(a, l->controls[SET_MOTION], switch_at(a, SET_MOTION, a->motion), hover == SET_MOTION);
-  widget_switch(a, l->controls[SET_BUDDIES], switch_at(a, SET_BUDDIES, a->buddies.on), hover == SET_BUDDIES);
+  const char *herons[4] = {strings()->buddies_off, "1", "2", "3"};
+  int herons_hover = hover >= SET_BUDDIES_OFF && hover <= SET_BUDDIES_3 ? hover - SET_BUDDIES_OFF : -1;
+  widget_group(a, &l->controls[SET_BUDDIES_OFF], 4, a->small_font, herons, a->buddies.herons, herons_hover);
   bool close = prefs_get_bool(PREF_CLOSE_ON_EXIT, true), restore = prefs_get_bool(PREF_RESTORE_WORKSPACE, true);
   widget_switch(a, l->controls[SET_CLOSE_ON_EXIT], switch_at(a, SET_CLOSE_ON_EXIT, close), hover == SET_CLOSE_ON_EXIT);
   widget_switch(a, l->controls[SET_RESTORE], switch_at(a, SET_RESTORE, restore), hover == SET_RESTORE);

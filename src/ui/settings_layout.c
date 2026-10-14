@@ -37,6 +37,12 @@ static void place_row(App *a, SettingsLayout *l, SettingsRow row, int y, int lef
       right_aligned(&l->controls[SET_FONT_SMALLER], w, 3, right, y, row_h, app_px(a, 26), 0);
       break;
     }
+    case ROW_BUDDIES: {  // off, 1, 2, 3
+      int off = (int)ui_text_width(a->small_font, strings()->buddies_off) + app_px(a, 18);
+      int w[4] = {off, app_px(a, 26), app_px(a, 26), app_px(a, 26)};
+      right_aligned(&l->controls[SET_BUDDIES_OFF], w, 4, right, y, row_h, app_px(a, 24), 0);
+      break;
+    }
     case ROW_RESET: {
       int w = (int)ui_text_width(a->ui_font, strings()->reset) + app_px(a, 24);
       if (w < app_px(a, 96)) w = app_px(a, 96);
@@ -44,9 +50,8 @@ static void place_row(App *a, SettingsLayout *l, SettingsRow row, int y, int lef
       break;
     }
     default: {  // a switch
-      static const SettingsControl SWITCHES[] = {[ROW_MOTION] = SET_MOTION, [ROW_BUDDIES] = SET_BUDDIES,
-                                                 [ROW_CLOSE] = SET_CLOSE_ON_EXIT, [ROW_RESTORE] = SET_RESTORE,
-                                                 [ROW_HOOKS] = SET_HOOKS};
+      static const SettingsControl SWITCHES[] = {[ROW_MOTION] = SET_MOTION, [ROW_CLOSE] = SET_CLOSE_ON_EXIT,
+                                                 [ROW_RESTORE] = SET_RESTORE, [ROW_HOOKS] = SET_HOOKS};
       int w = app_px(a, 34);
       right_aligned(&l->controls[SWITCHES[row]], &w, 1, right, y, row_h, app_px(a, 18), 0);
     }

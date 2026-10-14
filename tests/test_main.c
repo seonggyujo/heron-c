@@ -54,7 +54,8 @@ int g_failures;
   X(test_saved_work)             \
   X(test_buddy_sprites)          \
   X(test_buddy_ground)           \
-  X(test_buddy_crew)
+  X(test_buddy_crew)             \
+  X(test_buddy_flock)
 
 #define DECLARE(name) void name(void);
 TESTS(DECLARE)

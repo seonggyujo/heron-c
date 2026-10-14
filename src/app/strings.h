@@ -12,7 +12,7 @@ typedef struct {
   const char *minimize, *maximize, *close, *new_terminal, *choose_shell, *tidy;
   const char *empty_caption, *close_terminal, *failed_to_start;
   const char *settings, *theme, *theme_green, *theme_black, *language, *font_size, *font_smaller,
-      *font_larger, *animations, *buddies, *buddies_hint, *close_on_exit, *close_on_exit_hint,
+      *font_larger, *animations, *buddies, *buddies_off, *buddies_hint, *close_on_exit, *close_on_exit_hint,
       *restore_workspace, *restore_workspace_hint, *agent_hooks, *agent_hooks_hint, *reset, *reset_hint, *sure,
       *done;
   const char *agents, *collapse, *expand, *agent_idle, *agent_working, *agent_permission,

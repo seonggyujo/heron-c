@@ -1,5 +1,6 @@
-// The chicks, one per running subagent: they hatch beside the heron, follow
-// in a line behind it inside its run, and leave with a spark.
+// The chicks, one per running subagent, dealt out among the pane's herons:
+// they hatch beside their heron, follow in a line behind it inside its run,
+// and leave with a spark.
 #include <math.h>
 
 #include "buddy/crew_internal.h"
@@ -26,6 +27,11 @@ static Point place_of(const Crew *c, int i, Point heron) {
     x = x < left ? left : x > right ? right : x;
   }
   return (Point){x, heron.y};
+}
+
+int crew_chick_share(int subagents, int herons, int index) {
+  if (subagents <= 0 || herons <= 0 || index < 0 || index >= herons) return 0;
+  return (subagents - index + herons - 1) / herons;
 }
 
 void chicks_update(Crew *c, int want, float dt, uint64_t now) {

@@ -52,7 +52,7 @@ void test_buddy_crew(void) {
   feed(t, "\x1b[?25l");
   Crew c;
   uint64_t now = 1000;
-  crew_init(&c, 7, now);
+  crew_init(&c, 7, 0, now);
   CrewInput in = {t, true, AGENT_WORKING, 0, CELL_W, CELL_H};
   crew_update(&c, &in, now);
   CHECK(c.mood == MOOD_BUSY && c.placed && c.flying && c.spot.row == 11);  // flies in, to the bottom
@@ -108,5 +108,33 @@ void test_buddy_crew(void) {
   in.present = false;  // the agent left: it fades and the crew is done
   run(&c, &in, &now, 500);
   CHECK(crew_done(&c));
+  term_free(t);
+}
+
+void test_buddy_flock(void) {
+  // Subagents' chicks are dealt out among a pane's herons in turn.
+  CHECK(crew_chick_share(2, 3, 0) == 1 && crew_chick_share(2, 3, 1) == 1 && crew_chick_share(2, 3, 2) == 0);
+  CHECK(crew_chick_share(5, 2, 0) == 3 && crew_chick_share(5, 2, 1) == 2);
+  CHECK(crew_chick_share(4, 1, 0) == 4 && crew_chick_share(0, 3, 0) == 0 && crew_chick_share(3, 3, 3) == 0);
+
+  // The second heron flies in half a second after the first, and lands
+  // beside it rather than on it.
+  Term *t = term_new(60, 12, 0);
+  feed(t, "\x1b[?25l");
+  Crew first, second;
+  uint64_t now = 1000;
+  crew_init(&first, 7, 0, now);
+  crew_init(&second, 8, 1, now);
+  CrewInput in = {t, true, AGENT_IDLE, 0, CELL_W, CELL_H};  // asleep: they stay where they land
+  crew_update(&first, &in, now);
+  crew_update(&second, &in, now);
+  CHECK(first.placed && !second.placed);
+  for (int i = 0; i < 20; i++) {
+    now += 33;
+    crew_update(&first, &in, now);
+    crew_update(&second, &in, now);
+  }
+  CHECK(second.placed && second.spot.row == first.spot.row);
+  CHECK(second.at.x - first.at.x >= HERON_W || first.at.x - second.at.x >= HERON_W);
   term_free(t);
 }

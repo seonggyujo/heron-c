@@ -21,8 +21,9 @@ const Strings STRINGS_EN = {
     .font_larger = "Larger font",
     .animations = "Animations",
     .buddies = "Terminal herons",
-    .buddies_hint = "A heron lives in the empty space of each Claude Code pane: it walks and pecks while the "
-                    "agent works, calls with ! or ? when it needs you, cheers when it is done and sleeps when "
+    .buddies_off = "Off",
+    .buddies_hint = "How many herons live in the empty space of each Claude Code pane. They walk and peck while "
+                    "the agent works, call with ! or ? when it needs you, cheer when it is done and sleep when "
                     "idle. Each running subagent brings a chick. Drawn over blank cells only",
     .close_on_exit = "Close pane on exit 0",
     .close_on_exit_hint = "Close pane when the shell exits cleanly",

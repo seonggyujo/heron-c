@@ -1,6 +1,7 @@
 // Settings applied to the running app.
 #include "ui/app_settings.h"
 
+#include <stdlib.h>
 #include <string.h>
 
 #include "app/prefs.h"
@@ -19,11 +20,22 @@ static ThemeKind saved_theme(void) {
   return prefs_get(PREF_THEME, v, sizeof v) && strcmp(v, "black") == 0 ? THEME_BLACK : THEME_GREEN;
 }
 
+static int clamp_herons(int n) { return n < 0 ? 0 : n > BUDDIES_MAX ? BUDDIES_MAX : n; }
+
+// Herons per pane, 1 when never set. heron-c 0.2.0 saved only on or off
+// ("true" or "false"), read as 1 or 0.
+static int saved_herons(void) {
+  char v[16];
+  if (!prefs_get(PREF_BUDDIES, v, sizeof v)) return 1;
+  if (strcmp(v, "true") == 0 || strcmp(v, "false") == 0) return v[0] == 't';
+  return clamp_herons(atoi(v));
+}
+
 void app_load_settings(App *a) {
   theme_set(saved_theme());
   a->font_px = clamp_font(prefs_get_int(PREF_FONT_SIZE, FONT_DEFAULT));
   a->motion = prefs_get_bool(PREF_MOTION, true);
-  a->buddies.on = prefs_get_bool(PREF_BUDDIES, true);
+  a->buddies.herons = saved_herons();
   strings_lang();  // reads the saved language
 }
 
@@ -62,10 +74,12 @@ void app_set_motion(App *a, bool on) {
   app_redraw(a);
 }
 
-void app_set_buddies(App *a, bool on) {
-  a->buddies.on = on;
-  prefs_set_bool(PREF_BUDDIES, on);
-  log_info("settings", "terminal herons %s", on ? "on" : "off");
+void app_set_buddies(App *a, int herons) {
+  herons = clamp_herons(herons);
+  if (herons == a->buddies.herons) return;
+  a->buddies.herons = herons;
+  prefs_set_int(PREF_BUDDIES, herons);
+  log_info("settings", "terminal herons: %d per pane", herons);
   app_redraw(a);
 }
 
@@ -75,7 +89,7 @@ void app_reset_settings(App *a) {
   theme_set(THEME_GREEN);
   frame_apply_theme(a->hwnd);
   a->motion = true;
-  a->buddies.on = true;
+  a->buddies.herons = 1;
   a->shell = shell_default();
   sidebar_reset(a);
   if (a->font_px != FONT_DEFAULT) {

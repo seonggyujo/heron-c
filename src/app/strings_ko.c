@@ -22,9 +22,10 @@ const Strings STRINGS_KO = {
     .font_larger = "글씨 크게",
     .animations = "애니메이션",
     .buddies = "터미널 속 왜가리",
-    .buddies_hint = "Claude Code pane의 빈 곳에 왜가리가 살아요. 에이전트가 일하면 걸어 다니며 쪼고, 사용자가 "
-                    "필요하면 ! 나 ?로 부르고, 끝나면 날개를 펴고, 쉴 때는 자요. 실행 중인 서브에이전트마다 "
-                    "새끼가 한 마리씩 따라다녀요. 빈 칸 위에만 그려요",
+    .buddies_off = "끔",
+    .buddies_hint = "Claude Code pane마다 빈 곳에 사는 왜가리 수예요. 에이전트가 일하면 걸어 다니며 쪼고, "
+                    "사용자가 필요하면 ! 나 ?로 부르고, 끝나면 날개를 펴고, 쉴 때는 자요. 실행 중인 "
+                    "서브에이전트마다 새끼가 한 마리씩 따라다녀요. 빈 칸 위에만 그려요",
     .close_on_exit = "exit 0이면 pane 닫기",
     .close_on_exit_hint = "셸이 정상 종료되면 pane 닫기",
     .restore_workspace = "지난 작업 다시 열기",
