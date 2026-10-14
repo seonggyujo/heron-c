@@ -1,0 +1,5 @@
+// Windows resources: the app icon and the manifest.
+#include <winuser.h>
+
+1 ICON "heron.ico"
+CREATEPROCESS_MANIFEST_RESOURCE_ID RT_MANIFEST "heron.manifest"

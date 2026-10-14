@@ -1,0 +1,5 @@
+# clangd reads build/compile_commands.json, which CMake writes. The build uses
+# MinGW gcc, so clang must target MinGW and its headers, not MSVC's.
+CompileFlags:
+  CompilationDatabase: build
+  Add: [--target=x86_64-w64-mingw32]
