@@ -12,8 +12,9 @@ typedef struct {
   const char *minimize, *maximize, *close, *new_terminal, *choose_shell, *tidy;
   const char *empty_caption, *close_terminal, *failed_to_start;
   const char *settings, *theme, *theme_green, *theme_black, *language, *font_size, *font_smaller,
-      *font_larger, *animations, *close_on_exit, *close_on_exit_hint, *restore_workspace,
-      *restore_workspace_hint, *agent_hooks, *agent_hooks_hint, *reset, *reset_hint, *sure, *done;
+      *font_larger, *animations, *buddies, *buddies_hint, *close_on_exit, *close_on_exit_hint,
+      *restore_workspace, *restore_workspace_hint, *agent_hooks, *agent_hooks_hint, *reset, *reset_hint, *sure,
+      *done;
   const char *agents, *collapse, *expand, *agent_idle, *agent_working, *agent_permission,
       *agent_question, *agent_waiting, *agent_done, *agent_plugin_hint, *hooks_offer, *hooks_turn_on,
       *hooks_turning_on, *hooks_no_claude, *hooks_bad_settings, *hooks_failed, *hide, *new_agent,

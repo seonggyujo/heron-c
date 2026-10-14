@@ -4,8 +4,9 @@ Heron을 C로 다시 만든 터미널이다. Win32, ConPTY, Direct2D, DirectWrit
 한 파일은 한 가지 일만 맡고 약 150줄을 넘지 않는다. 각 파일 맨 위에 맡은 일을 적는다.
 
 터미널 안쪽은 꾸미지 않는다. xterm.js 기본 색, Cascadia Mono 글꼴, 프로그램이 출력한 바이트만 그린다.
+예외는 터미널 속 왜가리(설정에서 끔) 하나다. 에이전트가 있는 pane의 빈 칸 위에만 덧그리고, 터미널 내용은 바꾸지 않는다.
 테마(초록, 검정)와 상태 표시(셸, 폴더, 제목, 종료 코드, 실행 시간)는 타이틀바와 pane 테두리, 헤더에만 둔다.
-코딩 에이전트(Claude Code)의 상태는 왼쪽 사이드바, 하단 사용량 바, pane 헤더의 점 색으로만 보인다.
+코딩 에이전트(Claude Code)의 상태는 왼쪽 사이드바, 하단 사용량 바, pane 헤더의 점 색, 그리고 왜가리의 몸짓으로 보인다.
 
 ## 의존 방향
 
@@ -14,13 +15,14 @@ main.c → ui/ → pane/ → render/ → vt/ → base/
                      → pty/            ↗
                      → input/, layout/ ↗
              → hooks/ → agent/ → claude/ → base/
+             → buddy/ → vt/, agent/
              → git/ → base/
          app/(theme, strings, prefs, paths, workspace) → base/   (pane/, agent/, ui/가 쓴다)
 main.c → hooks/ (--agent-hook, --remove-agent-hooks는 창 없이 이것만)
 ```
 
 - `ui/`만 창(HWND)과 Windows 메시지를 안다. 아래 모듈은 `ui/`를 모른다.
-- `vt/`, `input/`, `layout/`은 화면 그리기와 창을 모르는 순수 계산이다. `claude/`, `agent/`, `hooks/`, `git/`도 창을 모르고, 파일과 프로세스는 `base/`를 거쳐 다룬다. 테스트(`tests/`)는 창 없이 이 모듈들과 `base/`, `app/`만으로 빌드된다.
+- `vt/`, `input/`, `layout/`, `buddy/`는 화면 그리기와 창을 모르는 순수 계산이다. `claude/`, `agent/`, `hooks/`, `git/`도 창을 모르고, 파일과 프로세스는 `base/`를 거쳐 다룬다. 테스트(`tests/`)는 창 없이 이 모듈들과 `base/`, `app/`만으로 빌드된다.
 - 느린 일(git, `claude --version`, 세션 파일 읽기, 훅 설치)은 `ui/background.c`가 다른 스레드에서 돌리고, 끝나면 UI 스레드에서 결과를 받는다.
 - Direct2D와 DirectWrite 타입은 `render/` 안에만 있다. 밖에는 `canvas.h`, `ui_text.h`, `mono_font.h`, `term_paint.h`의 불투명 API만 나간다.
 - `*_internal.h`, `*_parts.h`, `*_layout.h`, `canvas_d2d.h`, `mono_font_faces.h`, `fonts.h`, `glyph_fallback.h`, `term_cursor.h`, `parser_collect.h`, `split_tree_edit.h`, `strings_tables.h`, `file_drop_paths.h`, `json_reader.h`, `session_files.h`, `sidebar_hints.h`, `sidebar_recent.h`, `sidebar_hit.h`는 같은 폴더 안에서만 include한다.
@@ -141,7 +143,7 @@ main.c → hooks/ (--agent-hook, --remove-agent-hooks는 창 없이 이것만)
 | --- | --- |
 | `theme.c/h` | 앱 틀 색 두 가지(Heron의 초록 세이지, 검정). `THEME_*`는 지금 고른 테마의 값 |
 | `strings.c/h`, `strings_en.c`, `strings_ko.c`, `strings_tables.h` | 화면 글자 전부(Heron i18n과 같은 키, 한국어와 영어). 고른 적 없으면 Windows 표시 언어를 따른다. 숫자가 들어가는 문장 |
-| `prefs.c/h` | `%APPDATA%\heron-c\settings.ini`에 작은 설정 저장(셸, 테마, 언어, 글씨, 애니메이션, exit 0 닫기, 지난 작업 다시 열기, 사이드바 접힘, 닫은 안내, 접은 폴더, Claude Code 훅). 읽기 실패는 기본값으로. 초기화해도 훅 선택은 남긴다 |
+| `prefs.c/h` | `%APPDATA%\heron-c\settings.ini`에 작은 설정 저장(셸, 테마, 언어, 글씨, 애니메이션, 터미널 속 왜가리, exit 0 닫기, 지난 작업 다시 열기, 사이드바 접힘, 닫은 안내, 접은 폴더, Claude Code 훅). 읽기 실패는 기본값으로. 초기화해도 훅 선택은 남긴다 |
 | `strings_time.c` | 시간 글: 실행 시간("2m 14s"), 한도 초기화까지("2h 13m"), 얼마 전("5분 전", "어제") |
 | `paths.c/h` | 경로 도우미: 마지막 폴더 이름, worktree 안인지, 보여 줄 이름("heron · fix-login"), 묶음 키(소문자, 끝의 \ 없이) |
 | `workspace.c/h` | 지난 작업 저장 형식(pane마다 셸, 폴더, 세션 id와 배치)과 `%APPDATA%\heron-c\workspace.json` 읽고 쓰기 |
@@ -187,6 +189,19 @@ main.c → hooks/ (--agent-hook, --remove-agent-hooks는 창 없이 이것만)
 | `git.c/h` | 저장소 맨 위 폴더 찾기, HEAD 이후 바뀐 줄 수(추적 안 된 파일 포함). 콘솔 창 없이, git의 선택적 잠금 없이 |
 | `numstat.c/h` | `git diff --numstat` 합계와 새 파일 줄 수(순수 계산) |
 
+## `buddy/` 터미널 속 왜가리 (순수 계산)
+
+에이전트가 있는 pane마다 왜가리 한 마리와, 실행 중인 서브에이전트마다 새끼 한 마리. 터미널과 에이전트 상태는 읽기만 하고, 그리기는 `ui/buddies.c`가 한다. 위치 단위는 그림 픽셀이다.
+
+| 경로 | 역할 |
+| --- | --- |
+| `sprites.h`, `sprites.c`, `sprites_heron.c`, `sprites_internal.h` | 픽셀 그림: 왜가리 자세 8가지(서기, 걷기 둘, 쪼기, 날기 둘, 외다리 잠, 날개 펴기, 12×14), 새끼 3가지, 머리 위 표시(!, ?, z), 반짝이. 글자 하나가 픽셀 하나이고 색은 `ui/buddy_paint.c`가 정한다 |
+| `ground.c/h` | 지금 보이는 화면에서 빈 칸 덩어리 찾기. 빈 칸은 글자가 없고 기본 배경이며 반전, 밑줄, 취소선이 없고, 커서와 그 뒤 두 칸이 아닌 칸. 가장 아래(처음 나타날 때), 가장 가까운 곳(글자가 덮었을 때), 아무 곳(돌아다닐 때) |
+| `crew.c/h`, `crew_internal.h` | 왜가리 무리 하나: 에이전트 상태로 기분 정하기(작업 중, 권한 요청 !, 질문과 대기 ?, 끝남, 쉼), 나타나고 사라질 때 300ms 흐려지기, 끝나면 반짝이 셋. 프로그램이 화면을 다시 그리는 중(동기화 출력)에는 자리 판단을 미룬다 |
+| `crew_moves.c` | 빈 칸 지키기: 글자가 덮으면 가장 가까운 빈 곳으로 포물선을 그리며 날아가고(350~1100ms), 빈 곳이 없으면 사라졌다가 자리가 나면 옆에서 날아 들어온다. 일하는 동안 걷기, 쪼기, 쉬기를 번갈아 하고 9~16초마다 다른 빈 곳으로 날아간다. 여유가 있으면 글자에서 두 칸 떨어져 선다 |
+| `crew_chicks.c` | 새끼(최대 6): 왜가리 옆에서 깨어나 뒤로 줄지어 따라가고, 떠날 때 반짝이를 남긴다 |
+| `crew_pose.c` | 지금 그릴 그림 목록(그림, 위치, 좌우 뒤집기, 투명도)과 다음 프레임까지 기다릴 시간(움직이면 33ms, 부르는 중이면 400ms 박자, 서 있거나 자면 없음) |
+
 ## `ui/` 창
 
 | 경로 | 역할 |
@@ -195,19 +210,21 @@ main.c → hooks/ (--agent-hook, --remove-agent-hooks는 창 없이 이것만)
 | `app.c/h` | 앱 상태(DPI에 맞춘 크기와 글꼴, 사이드바와 사용량 바의 글자 모양 표, pane 목록, 새 pane 셸, 에이전트와 사이드바 상태, 마우스와 IME와 드롭다운과 끌기 상태), CSS 픽셀 크기 바꾸기, 작업 영역(사이드바 오른쪽, 사용량 바 위)에 pane 맞추기 |
 | `app_panes.c` | pane 열기(셸에 pane 파일 위치를 알리는 환경변수, 첫 프롬프트에 칠 명령), 닫기, 옮기기, 정리, 포커스. 배치가 바뀌기 전 자리를 찍어 두고 바뀐 뒤 미끄러지게 한다 |
 | `app_events.c/h` | 크기, DPI, 활성화(에이전트 확인, git, 최근 세션 다시 읽기), pty 출력(제목, 폴더, 프롬프트 신호, 첫 프롬프트에 명령 입력), 셸 종료(exit 0이고 설정이 켜져 있으면 닫기) |
-| `app_settings.c/h` | 설정을 실행 중인 앱에 적용하고 저장: 테마, 언어, 글씨 크기, 애니메이션, 초기화 |
+| `app_settings.c/h` | 설정을 실행 중인 앱에 적용하고 저장: 테마, 언어, 글씨 크기, 애니메이션, 터미널 속 왜가리, 초기화 |
 | `frame.c/h` | Windows 타이틀바 없는 창: 전체가 클라이언트 영역, 크기 조절 가장자리, 끌기 영역, Windows 11 둥근 모서리와 그림자, 테마에 맞춘 테두리 |
 | `titlebar.c/h`, `titlebar_parts.h`, `titlebar_buttons.c` | 타이틀바: 왼쪽 "● HERON", 오른쪽 자동 격자 버튼(수동 배치일 때만), 실행 개수(실행 중이 없으면 흐리게), 톱니, 새 터미널 split 버튼(셸 이름은 고정 폭), Windows 순서의 신호등 버튼 |
 | `widgets.c/h` | 공용 컨트롤 그리기: 버튼, 묶음 버튼, 스위치, 테마 견본, 드롭다운 판, 글자 간격을 둔 대문자 제목 |
 | `popover.c/h` | 한 번에 하나만 열리는 드롭다운(셸 메뉴, 설정 창, 새 에이전트 폴더 메뉴)으로 마우스와 키 보내기, 바깥 클릭과 Esc로 닫기. 열고 닫을 때 120ms 동안 4px 위, 0.98 크기, 투명에서 오고 간다 |
 | `shell_menu.c/h`, `shell_menu_layout.h`, `shell_menu_paint.c` | 셸 선택 드롭다운을 앱 테마로 직접 그린다. 체크 표시, 마우스 강조, 위아래 키와 Enter. 고르면 선택만 하고 기억한다 |
-| `settings_panel.h`, `settings_layout.c/h`, `settings_paint.c`, `settings_input.c` | 설정 창: 테마, 언어, 글씨 크기(A−, A+), 애니메이션, exit 0이면 닫기, 지난 작업 다시 열기, Claude Code 훅(실패하면 이유를 아래에 11px로), 초기화(3초 안에 한 번 더 눌러야 실행, 끝나면 "완료"). 누른 스위치 손잡이는 120ms 동안 미끄러진다 |
+| `settings_panel.h`, `settings_layout.c/h`, `settings_paint.c`, `settings_input.c` | 설정 창: 테마, 언어, 글씨 크기(A−, A+), 애니메이션, 터미널 속 왜가리, exit 0이면 닫기, 지난 작업 다시 열기, Claude Code 훅(실패하면 이유를 아래에 11px로), 초기화(3초 안에 한 번 더 눌러야 실행, 끝나면 "완료"). 누른 스위치 손잡이는 120ms 동안 미끄러진다 |
 | `empty_state.c/h` | pane이 없을 때 큰 + 버튼과 깜빡이는 커서가 붙은 "새 터미널_" |
-| `animation.c/h` | 프레임 타이머: 출력 번쩍임, 포커스 빛(200ms로 옮겨 감), 상태 점 깜빡임, 빈 화면(마지막 pane이 닫히고 120ms 뒤 200ms로 나타남)과 커서, pane 움직임, 사이드바 폭, 드롭다운. 움직이는 것이 있을 때만 돈다 |
+| `animation.c/h` | 프레임 타이머: 출력 번쩍임, 포커스 빛(200ms로 옮겨 감), 상태 점 깜빡임, 빈 화면(마지막 pane이 닫히고 120ms 뒤 200ms로 나타남)과 커서, pane 움직임, 사이드바 폭, 드롭다운, 터미널 속 왜가리. 움직이는 것이 있을 때만 돈다 |
 | `pane_motion.c/h` | pane 움직임(Heron의 flip.ts, pane-motion.ts): 새 자리로 220ms 미끄러지기, 0.96에서 커지며 220ms 나타나기, 0.94로 줄며 180ms 사라지기. 그리는 위치만 움직이고 터미널 크기는 바로 바뀐다 |
 | `dividers.c/h` | pane 사이 틈: 마우스를 올리면 2px 선, 크기 조절 커서, 끌어서 크기 바꾸기, 더블클릭 반반. 끄는 중에 pane이 열리거나 닫히면 끌기를 멈춘다 |
 | `header_drag.c/h` | pane 헤더 끌기: 5px 넘게 움직이면 시작, 끄는 pane은 반투명, 놓을 자리 미리보기(자리 바꾸기는 점선), Esc 취소 |
-| `paint.c/h` | WM_PAINT: 타이틀바, 빈 화면 또는 pane들(사라지는 pane은 아래에, 사이드바 폭이 움직이는 동안 작업 영역을 따라 늘고 줄며), 경계선, 사이드바, 사용량 바, 놓을 자리, 드롭다운 |
+| `buddies.c/h`, `buddies_state.h` | 터미널 속 왜가리: 에이전트가 있는 pane마다 무리(`buddy/crew.h`)를 만들고, 프레임마다 움직이고, pane 그림 위에 터미널 영역으로 잘라 그린다. 그림 픽셀 크기는 왜가리와 머리 위 표시가 세 줄이 되게. 설정 > 터미널 속 왜가리와 애니메이션이 둘 다 켜져 있을 때만 |
+| `buddy_paint.c/h` | 그림 글자를 테마 색 사각형으로(몸 fg_soft, 날개 fg_dim, 부리와 다리 호박색, 새끼 노랑, !와 ? 도움 필요 노랑). 가장자리를 기기 픽셀에 맞춰 이음매 없이 |
+| `paint.c/h` | WM_PAINT: 타이틀바, 빈 화면 또는 pane들(그 위에 왜가리, 사라지는 pane은 아래에, 사이드바 폭이 움직이는 동안 작업 영역을 따라 늘고 줄며), 경계선, 사이드바, 사용량 바, 놓을 자리, 드롭다운 |
 | `keyboard.c/h` | 끌기 취소(Esc), 드롭다운 키, 세션 삭제 질문 닫기(Esc), 단축키(선택 있으면 Ctrl+C 복사, Ctrl+V 붙여넣기, Ctrl+Shift+T 새 pane, Ctrl+Tab 다음 pane), 그다음 포커스된 pane으로. Esc나 Ctrl+C만 누르면 에이전트가 멈춘 것으로 |
 | `ime.c/h` | IME: 조합 중인 글자는 앱이 커서 자리에 그리고, 완성된 글자는 pane으로. 후보 창은 커서 옆에 |
 | `mouse.c/h` | 타이틀바 버튼, pane 닫기 버튼, 빈 화면 버튼의 hover와 클릭, 경계선과 헤더 끌기, 사이드바, 사용량 바 칩으로 보내기. pane 위에서는 포커스, 선택, 오른쪽 클릭(선택 있으면 복사, 없으면 붙여넣기) |
@@ -241,7 +258,7 @@ main.c → hooks/ (--agent-hook, --remove-agent-hooks는 창 없이 이것만)
 
 ## 테스트 `tests/`
 
-`heron-c-tests.exe`는 `base/`, `vt/`, `input/`, `layout/`, `claude/`, `agent/`, `hooks/`, `git/`, `app/`만으로 빌드한다(창이 필요 없다).
+`heron-c-tests.exe`는 `base/`, `vt/`, `input/`, `layout/`, `claude/`, `agent/`, `hooks/`, `git/`, `buddy/`, `app/`만으로 빌드한다(창이 필요 없다).
 
 | 경로 | 역할 |
 | --- | --- |
@@ -261,6 +278,8 @@ main.c → hooks/ (--agent-hook, --remove-agent-hooks는 창 없이 이것만)
 | `test_paths.c` | 경로 도우미, 세션 폴더 묶기, 시간 글 |
 | `test_git.c` | numstat 합계와 새 파일 줄 수 |
 | `test_workspace.c` | 배치 모양 저장과 확인, 지난 작업 형식 |
+| `test_buddy_ground.c` | 그림 크기, 빈 칸 찾기(배경색, 반전, 커서, 가장 아래, 가장 가까운 곳, 아무 곳, 자리 없음) |
+| `test_buddy_crew.c` | 왜가리의 기분별 몸짓과 프레임 요청, 덮이면 날아가기(동기화 출력 중에는 기다림), 새끼, 사라졌다 돌아오기 |
 
 ## 로그
 

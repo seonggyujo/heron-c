@@ -11,6 +11,7 @@
 #define PREF_THEME "theme"
 #define PREF_FONT_SIZE "font_size"
 #define PREF_MOTION "motion"
+#define PREF_BUDDIES "buddies"
 #define PREF_CLOSE_ON_EXIT "close_on_exit"
 #define PREF_RESTORE_WORKSPACE "restore_workspace"
 #define PREF_SIDEBAR_COLLAPSED "sidebar_collapsed"

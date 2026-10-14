@@ -11,6 +11,7 @@
 #include "render/mono_font.h"
 #include "render/ui_text.h"
 #include "ui/agent_state.h"
+#include "ui/buddies_state.h"
 #include "ui/sidebar_state.h"
 
 enum { WM_PANE_OUTPUT = WM_APP + 1, WM_PANE_EXIT, WM_JOB_DONE };
@@ -76,6 +77,7 @@ typedef struct {
   UiFont *fonts[FONT_COUNT];
   PaneList panes;
   AgentsState agents;
+  BuddiesState buddies;  // the terminal herons (ui/buddies.c)
   SidebarState sidebar;
   bool usage_shown;  // the usage bar is up (ui/usage_bar.c)
   bool work_open;    // the first panes are open, so saving the work may start

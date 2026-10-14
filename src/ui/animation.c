@@ -6,6 +6,7 @@
 #include <math.h>
 
 #include "base/easing.h"
+#include "ui/buddies.h"
 #include "ui/pane_motion.h"
 #include "ui/popover.h"
 #include "ui/sidebar.h"
@@ -78,6 +79,8 @@ void anim_after_paint(App *a) {
     const Pane *p = shown->items[i];
     if (p->output_at && now - p->output_at < ACTIVE_MS && pane_running(p)) wait = FRAME_MS;
   }
+  UINT herons = buddies_wait(a, now);
+  if (herons && (!wait || herons < wait)) wait = herons;
   if (!wait && a->motion && shown->count == 0) wait = (UINT)(BLINK_MS - now % BLINK_MS) + 1;
   if (wait) {
     SetTimer(a->hwnd, TIMER_ANIMATION, wait, NULL);

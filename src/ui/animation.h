@@ -1,8 +1,10 @@
 // The frame timer for the small animations (Heron's effects.css): the
 // output flash on a pane border, the focus glow fading in and out, the
 // status dot pulsing while output arrives, the empty state fading and its
-// cursor blink, and panes moving, appearing and leaving (ui/pane_motion.h). The timer runs only while something moves,
-// so an idle app draws no frames. Settings > Animations turns them off.
+// cursor blink, panes moving, appearing and leaving (ui/pane_motion.h), and
+// the terminal herons (ui/buddies.h). The timer runs only while something
+// moves, so an idle app draws no frames. Settings > Animations turns them
+// off.
 #pragma once
 
 #include "ui/app.h"

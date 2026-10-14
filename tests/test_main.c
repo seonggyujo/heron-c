@@ -51,7 +51,10 @@ int g_failures;
   X(test_session_groups)         \
   X(test_time_texts)             \
   X(test_tree_shape)             \
-  X(test_saved_work)
+  X(test_saved_work)             \
+  X(test_buddy_sprites)          \
+  X(test_buddy_ground)           \
+  X(test_buddy_crew)
 
 #define DECLARE(name) void name(void);
 TESTS(DECLARE)

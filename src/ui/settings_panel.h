@@ -1,8 +1,8 @@
 // The settings panel under the gear button: theme, language, font size,
-// animations, close on exit 0, reopen last work, Claude Code hooks (with
-// the reason under it when turning them on or off failed), and Reset
-// (which asks first). Every change applies at once and is remembered. Opening and
-// closing is ui/popover.c.
+// animations, terminal herons, close on exit 0, reopen last work, Claude
+// Code hooks (with the reason under it when turning them on or off
+// failed), and Reset (which asks first). Every change applies at once and
+// is remembered. Opening and closing is ui/popover.c.
 #pragma once
 
 #include <stdbool.h>

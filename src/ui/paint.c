@@ -6,6 +6,7 @@
 #include "pane/pane_paint.h"
 #include "ui/agents.h"
 #include "ui/animation.h"
+#include "ui/buddies.h"
 #include "ui/dividers.h"
 #include "ui/empty_state.h"
 #include "ui/header_drag.h"
@@ -28,8 +29,8 @@ static PanePose follow_sidebar(const App *a, PanePose pose) {
   return pose;
 }
 
-// Draws p where its animation puts it: moved and scaled from its frame,
-// and faded.
+// Draws p, and the heron over its terminal, where its animation puts it:
+// moved and scaled from its frame, and faded.
 static void paint_pane(App *a, Pane *p, const PaneStyle *style, PaneState state) {
   PanePose pose = follow_sidebar(a, motion_pose(a, p, style->now));
   if (header_drag_dragging(a, p)) pose.opacity *= 0.5f;
@@ -40,6 +41,7 @@ static void paint_pane(App *a, Pane *p, const PaneStyle *style, PaneState state)
   if (moved) canvas_set_transform(a->canvas, sx, sy, pose.x - f.x * sx, pose.y - f.y * sy);
   if (pose.opacity < 1) canvas_push_opacity(a->canvas, pose.opacity);
   pane_paint(a->canvas, p, style, state);
+  buddies_paint(a, p, style->now);
   if (pose.opacity < 1) canvas_pop_opacity(a->canvas);
   if (moved) canvas_set_transform(a->canvas, 1, 1, 0, 0);
 }
@@ -52,6 +54,7 @@ PaneStyle paint_pane_style(const App *a, ULONGLONG now) {
 static void paint_panes(App *a) {
   ULONGLONG now = GetTickCount64();
   PaneStyle style = paint_pane_style(a, now);
+  buddies_step(a, now);
   for (int i = 0; i < a->panes.leaving.count; i++) {
     Pane *p = a->panes.leaving.items[i];
     PaneState state = {.dot = 1};

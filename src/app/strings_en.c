@@ -20,6 +20,10 @@ const Strings STRINGS_EN = {
     .font_smaller = "Smaller font",
     .font_larger = "Larger font",
     .animations = "Animations",
+    .buddies = "Terminal herons",
+    .buddies_hint = "A heron lives in the empty space of each Claude Code pane: it walks and pecks while the "
+                    "agent works, calls with ! or ? when it needs you, cheers when it is done and sleeps when "
+                    "idle. Each running subagent brings a chick. Drawn over blank cells only",
     .close_on_exit = "Close pane on exit 0",
     .close_on_exit_hint = "Close pane when the shell exits cleanly",
     .restore_workspace = "Reopen last work",

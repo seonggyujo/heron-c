@@ -33,9 +33,10 @@ if(NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
 endif()
 
 # Unit tests for the modules that need no window: base, vt, input, layout,
-# claude, agent, hooks, git, app.
+# claude, agent, hooks, git, buddy, app.
 file(GLOB_RECURSE CORE_SOURCES CONFIGURE_DEPENDS
-  src/base/*.c src/vt/*.c src/input/*.c src/layout/*.c src/claude/*.c src/agent/*.c src/hooks/*.c src/git/*.c src/app/*.c)
+  src/base/*.c src/vt/*.c src/input/*.c src/layout/*.c src/claude/*.c src/agent/*.c src/hooks/*.c src/git/*.c
+  src/buddy/*.c src/app/*.c)
 file(GLOB TEST_SOURCES CONFIGURE_DEPENDS tests/*.c)
 add_executable(heron-c-tests ${CORE_SOURCES} ${TEST_SOURCES})
 target_include_directories(heron-c-tests PRIVATE tests)

@@ -70,7 +70,7 @@ void prefs_set_int(const char *key, int value) {
 
 void prefs_reset(void) {
   static const char *const KEYS[] = {PREF_SHELL,   PREF_LANG,          PREF_THEME,
-                                     PREF_FONT_SIZE, PREF_MOTION,      PREF_CLOSE_ON_EXIT,
+                                     PREF_FONT_SIZE, PREF_MOTION,      PREF_BUDDIES, PREF_CLOSE_ON_EXIT,
                                      PREF_RESTORE_WORKSPACE, PREF_SIDEBAR_COLLAPSED,
                                      PREF_PLUGIN_HINT_HIDDEN, PREF_HOOKS_OFFER_HIDDEN,
                                      PREF_FOLDED_GROUPS};

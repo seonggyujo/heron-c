@@ -16,7 +16,7 @@ static void paint_title(App *a, Box b) {
 
 static const char *row_label(SettingsRow row) {
   const Strings *s = strings();
-  const char *labels[ROW_COUNT] = {s->theme,      s->language,      s->font_size, s->animations,
+  const char *labels[ROW_COUNT] = {s->theme,         s->language,          s->font_size,   s->animations, s->buddies,
                                    s->close_on_exit, s->restore_workspace, s->agent_hooks, s->settings};
   return labels[row];
 }
@@ -50,6 +50,7 @@ static void paint_controls(App *a, const SettingsLayout *l) {
                ALIGN_CENTER);
 
   widget_switch(a, l->controls[SET_MOTION], switch_at(a, SET_MOTION, a->motion), hover == SET_MOTION);
+  widget_switch(a, l->controls[SET_BUDDIES], switch_at(a, SET_BUDDIES, a->buddies.on), hover == SET_BUDDIES);
   bool close = prefs_get_bool(PREF_CLOSE_ON_EXIT, true), restore = prefs_get_bool(PREF_RESTORE_WORKSPACE, true);
   widget_switch(a, l->controls[SET_CLOSE_ON_EXIT], switch_at(a, SET_CLOSE_ON_EXIT, close), hover == SET_CLOSE_ON_EXIT);
   widget_switch(a, l->controls[SET_RESTORE], switch_at(a, SET_RESTORE, restore), hover == SET_RESTORE);

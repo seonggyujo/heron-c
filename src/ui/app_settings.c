@@ -23,6 +23,7 @@ void app_load_settings(App *a) {
   theme_set(saved_theme());
   a->font_px = clamp_font(prefs_get_int(PREF_FONT_SIZE, FONT_DEFAULT));
   a->motion = prefs_get_bool(PREF_MOTION, true);
+  a->buddies.on = prefs_get_bool(PREF_BUDDIES, true);
   strings_lang();  // reads the saved language
 }
 
@@ -61,12 +62,20 @@ void app_set_motion(App *a, bool on) {
   app_redraw(a);
 }
 
+void app_set_buddies(App *a, bool on) {
+  a->buddies.on = on;
+  prefs_set_bool(PREF_BUDDIES, on);
+  log_info("settings", "terminal herons %s", on ? "on" : "off");
+  app_redraw(a);
+}
+
 void app_reset_settings(App *a) {
   prefs_reset();
   strings_follow_system();
   theme_set(THEME_GREEN);
   frame_apply_theme(a->hwnd);
   a->motion = true;
+  a->buddies.on = true;
   a->shell = shell_default();
   sidebar_reset(a);
   if (a->font_px != FONT_DEFAULT) {
